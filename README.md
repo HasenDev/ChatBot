@@ -164,7 +164,7 @@ Visit `http://localhost:9700` to see your ChatBot in action.
 * Ensure all API keys, database credentials, and secrets are kept secure.
 
 ---
+**Make sure to star this project if you want to support me in improving it!**
 
-**Now Enjoy!**
-
----
+### More Projects:
+* [AdmiBot](https://admibot.xyz): All-in-One Discord Bot! Combine multiple bot features into one. Simplify server management and save time. Try it today!
