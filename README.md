@@ -1,66 +1,103 @@
-
 # ChatBot
 
-![Preview](./images/preview.png)
+<img src="./images/preview.png" alt="Preview" width="420"/>
 
-**ChatBot** is an open-source chatbot built like a production system, inspired by ChatGPT and Gemini UX/UI. It features a modular design, user sessions, persistent storage, and API integrations, allowing you to learn, experiment, or build your own chatbot while exploring real-world production bot architecture.
+**ChatBot** is an open-source, production-oriented chatbot reference implementation inspired by modern conversational UIs such as ChatGPT and Gemini. It demonstrates a modular architecture, session management, persistent storage, and third-party API integrations (Discord OAuth2, Google Gemini, GROQ CMS). Use this repository to learn, prototype, or extend a real-world chatbot architecture.
 
-For a live working example, visit [ChatBot Demo](https://chat.admibot.xyz).
-
----
-
-## Features
-
-- Modular chatbot design
-- User sessions & persistent storage
-- Discord OAuth2 login support
-- Google Gemini API integration
-- Groq CMS integration
-- CDN support for custom user icons
-- Production-ready architecture for learning and experimentation
+For a live working example, visit: [https://chat.admibot.xyz](https://chat.admibot.xyz)
 
 ---
 
-## 1. Project Setup
+## Key features
 
-### 1.1 Download the Source Code
+* Modular, production-style code organization
+* User sessions with persistent storage
+* Discord OAuth2 login support
+* Google Gemini API integration
+* GROQ CMS integration
+* CDN hooks for custom user icons
+* Deployment & tunnel guides (Cloudflare Tunnels)
+* Production-ready patterns for experimentation and learning
 
-Clone or download this repository to your VPS.  
-> Recommended OS: **Ubuntu or Debian** (Windows requires additional build tools for Next.js)
+---
+
+## Table of contents
+
+1. [Prerequisites](#prerequisites)
+2. [Project setup](#project-setup)
+3. [Environment variables (`.env.local`)](#environment-variables-envlocal)
+4. [Configuration (`public/config.yml`)](#configuration-publicconfigyml)
+5. [MongoDB: step-by-step](#mongodb-step-by-step)
+6. [Google Gemini API key](#google-gemini-api-key)
+7. [GROQ API key](#groq-api-key)
+8. [Discord OAuth2 setup](#discord-oauth2-setup)
+9. [Install, build & run](#install-build--run)
+10. [Cloudflare Tunnel (Zero Trust) — quick guide](#cloudflare-tunnel-zero-trust---quick-guide)
+11. [Notes, security & best practices](#notes-security--best-practices)
+12. [License](#license)
+13. [Support / More projects](#support--more-projects)
+
+---
+
+## Prerequisites
+
+* Recommended OS: **Ubuntu / Debian** (Windows can be used but requires additional build tools for Next.js).
+* Node.js: **v20 or v21** (use `node -v` to confirm).
+* A domain added to Cloudflare (required if you plan to expose your local instance via Cloudflare Tunnels).
+* A MongoDB Atlas account (or any MongoDB instance reachable from your server).
+* Accounts/keys for Google Gemini and GROQ (see sections below).
+* A Discord Application for OAuth2 (see section below).
+
+---
+
+## Project setup
+
+### 1. Clone the repository
 
 ```bash
 git clone https://github.com/HasenDev/ChatBot.git
-cd chatbot
-````
+cd ChatBot
+```
 
-### 1.2 Environment Variables
+### 2. Create and populate environment variables
 
-Create a file named `.env.local` in the project root with the following content:
+Create `.env.local` in the project root and add the variables listed in the next section. Keep this file private — **do not** commit it to source control.
+
+---
+
+## Environment variables (`.env.local`)
+
+Create `.env.local` with the following content (replace placeholder values with your credentials):
 
 ```env
-# Discord Application client ID
+# Discord Application client ID (replace with your own)
 DISCORD_CLIENT_ID=00000000000000
 
-# Discord Application client secret
+# Discord application client Secret (replace with your own)
 DISCORD_CLIENT_SECRET=your_discord_client_secret_here
 
-# Secret for NextAuth authentication
+# Secret for NextAuth authentication (replace with a strong random string)
 NEXTAUTH_SECRET=replace_with_a_strong_random_secret
 
-# URL where your Next.js app is hosted
+# URL where your Next.js app is hosted (e.g. https://chat.example.com)
 NEXTAUTH_URL=https://ex.com
 
-# MongoDB connection string
+# MongoDB connection string (replace with your own credentials)
 MONGODB_URI="mongodb+srv://username:password@cluster.mongodb.net/dbname?retryWrites=true&w=majority"
 
-# Discord bot token
+# Discord bot token (replace with your bot's token)
 DISCORD_BOT_TOKEN="your_discord_bot_token_here"
 
-# Google Gemini API key
+# Google Gemini API key (replace with a valid key from Google Gemini Studio)
 GEMINI_API_KEY=replace_with_google_api_key
 
-# GROQ API key
+# GROQ API key for querying your headless CMS (replace with a valid key from https://console.groq.com/playground)
 GROQ_API_KEY=replace_with_groq_api_key
+
+# --------------------------------------------------------
+# CDN feature: used for uploading custom user icons in settings.
+# These are placeholders. Implement your own CDN endpoint or modify lib/UploadCDN.ts.
+# --------------------------------------------------------
 
 # CDN upload URL (placeholder)
 CDN_UPLOAD_URL=https://cdn.admibot.xyz
@@ -69,102 +106,163 @@ CDN_UPLOAD_URL=https://cdn.admibot.xyz
 CDN_SECRET_KEY=replace_with_your_own_secret_key
 ```
 
+**Important:** Use a strong random `NEXTAUTH_SECRET` (e.g., `openssl rand -hex 32`) and never share your `.env.local` publicly.
+
 ---
 
-### 1.3 Configure `config.yml`
+## Configuration (`public/config.yml`)
 
-Update the chatbot name and icon in `public/config.yml`:
+Edit `public/config.yml` to set branding and static site values:
 
 ```yml
 siteName: "ChatBot" # Replace with your ChatBot name
-iconPath: "https://images-ext-1.discordapp.net/external/bk15l3IluZ9Yd5CbmXwmzRXNLhntA2kTKM9pPsDeKhg/%3Fsize%3D2048/https/cdn.discordapp.com/icons/1293949144540381185/ddf47008e55e143e7af8d112da80d9c8.webp?format=webp&width=300&height=300"
+iconPath: "https://your.cdn/path/to/icon.webp"
+```
+
+Example:
+
+```yml
+siteName: "ChatBot by AdmiBot"
+iconPath: "https://cdn.example.com/icons/chatbot-300x300.webp"
 ```
 
 ---
 
-## 2. MongoDB Setup
+## MongoDB — step-by-step
 
-1. Visit [MongoDB Cloud](https://cloud.mongodb.com/) and log in or sign up.
-2. Create a new organization (if not already).
-3. Go to **Projects** → Click **New Project** ![New Project](./images/new_project.png)
-4. Enter your project name ![Project Name](./images/name_next.png) → Click **Next** → Click **Create Project**
-5. Inside your project, click **Create Cluster** ![Create Cluster](./images/create-cluster.png) → Select **Free Tier** → Click **Create Deployment** ![Creating Cluster](./images/creating-cluster.png)
-6. After the cluster is created, click **Connect**:
+1. Sign in to MongoDB Cloud ([https://cloud.mongodb.com/](https://cloud.mongodb.com/)) and create a project. <img src="./images/new_project.png" alt="New Project" width="360"/>
 
-   * Create a database user and copy the password
-   * Click **Choose a connection method** ![Step 1](./images/step-1-creating.png)
-   * Click **Drivers** ![Step 2](./images/step-2-creating.png)
-   * Copy the connection string ![Step 3](./images/step-3-creating.png) and paste it in `.env.local` under `MONGODB_URI`
-   * Add your IP address under **Network Access** → **Allow access from anywhere**
+2. Inside the project click **Create Cluster** → choose **Free Tier** (or another cluster type). <img src="./images/create-cluster.png" alt="Create Cluster" width="360"/>
 
-MongoDB is now ready for your app.
+3. Configure and create the cluster. Wait until the cluster shows **Running**. <img src="./images/creating-cluster.png" alt="Creating Cluster" width="360"/>
 
----
+4. Click **Connect** for the cluster and follow the steps:
 
-## 3. Google Gemini API Key
+   * Create a **database user** (username + password) and note them.
+   * Under **Network Access** add your IP (or allow access from anywhere while testing — **not** recommended for production).
+   * Choose **Connect your application** and copy the connection string (select the Node.js driver).
 
-1. Visit [Google Gemini Studio](https://aistudio.google.com/prompts/new_chat) and log in.
-2. Click **Get API Key** → **Create API Key** → Choose your Google Cloud project → Click **Create**
-3. Copy the generated API key and paste it into `.env.local` under `GEMINI_API_KEY`.
+     <img src="./images/step-1-creating.png" alt="Step 1" width="360"/>
+
+   <img src="./images/step-2-creating.png" alt="Step 2" width="360"/>
+   <img src="./images/step-3-creating.png" alt="Step 3" width="360"/>
+
+5. Paste the connection string into `MONGODB_URI` in `.env.local` and replace `<username>`, `<password>`, and `<dbname>`.
 
 ---
 
-## 4. Groq API Key
+## Google Gemini API key
 
-1. Visit [Groq Playground](https://console.groq.com/playground) and log in.
-2. Click **API Keys** → **Create API Key** → Name your key → Complete CAPTCHA → Click **Create**
-3. Copy the key and paste it into `.env.local` under `GROQ_API_KEY`.
+1. Visit Google Gemini Studio (e.g., [https://aistudio.google.com/](https://aistudio.google.com/)) and sign in to your Google account.
+2. Create or select a Google Cloud project.
+3. Generate an API key (follow the UI: **Get API Key** → **Create API Key**).
+4. Restrict the API key (recommended): restrict by IP and API usage in Google Cloud Console.
+5. Put the key into `GEMINI_API_KEY` in `.env.local`.
 
 ---
 
-## 5. Discord OAuth2 Setup
+## GROQ API key
 
-1. Visit [Discord Developer Portal](https://discord.com/developers/applications/) and log in.
-2. Click **New Application**, choose a name, accept terms, and click **Create**
-3. Under **OAuth2**, copy the **Client ID** → paste in `.env.local` as `DISCORD_CLIENT_ID`
-4. Click **Reset Secret** → Copy new **Client Secret** → paste in `.env.local` as `DISCORD_CLIENT_SECRET`
-5. Add Redirect URI:
+1. Log in to GROQ Console ([https://console.groq.com/playground](https://console.groq.com/playground)).
+2. Go to **API Keys** → **Create API Key**, name it, complete any required CAPTCHAs, then create.
+3. Copy the generated key into `GROQ_API_KEY` in `.env.local`.
+4. Limit permissions on your GROQ API key according to your CMS needs.
+
+---
+
+## Discord OAuth2 setup
+
+1. Open the Discord Developer Portal ([https://discord.com/developers/applications](https://discord.com/developers/applications)) and log in.
+2. Create a **New Application**, name it and save.
+3. In OAuth2 settings:
+
+   * Copy **Client ID** → set `DISCORD_CLIENT_ID` in `.env.local`.
+   * Click **Reset Secret** (or **Client Secret**) → copy and set `DISCORD_CLIENT_SECRET` in `.env.local`.
+4. Add **Redirect URI** for NextAuth:
 
 ```
 https://yourappdomain.com/api/auth/callback/discord
 ```
 
-6. Set `NEXTAUTH_URL` in `.env.local` to your application URL.
-7. Set a strong random string for `NEXTAUTH_SECRET`.
+5. Set `NEXTAUTH_URL` to the public URL of your app and use a secure `NEXTAUTH_SECRET`.
 
 ---
 
-## 6. Install Dependencies & Build
+## Install, build & run
 
-Ensure you have Node.js v20 or v21 installed. Then:
+Ensure Node.js v20/21 is installed.
 
 ```bash
+# Install dependencies
 npm install
+
+# Build the Next.js app
 npm run build
-```
 
----
-
-## 7. Start the Application
-
-Run the server on port 9700:
-
-```bash
+# Start the server (default port used by this project shown below)
 npm run start
 ```
 
-Visit `http://localhost:9700` to see your ChatBot in action.
+By default the application serves on **port 9700**. Visit `http://localhost:9700` to verify.
+If you change the port in your runtime configuration, update any tunneling or reverse-proxy settings accordingly.
 
 ---
 
-### Notes
+## Cloudflare Tunnel (Zero Trust) — quick guide
 
-* The `/images/preview.png` shows a working example interface of the chatbot.
-* CDN uploads require your own implementation; placeholders are included for reference.
-* Ensure all API keys, database credentials, and secrets are kept secure.
+> This guide shows how to expose a local instance through Cloudflare Zero Trust Tunnels (cloudflared). It assumes you have a domain added to your Cloudflare account.
+
+1. Sign in to your Cloudflare account at [https://dash.cloudflare.com](https://dash.cloudflare.com).
+2. In the left sidebar scroll and click **Zero Trust**.
+3. Once Zero Trust loads, click **Network** in the Zero Trust sidebar.
+4. Select **Tunnels** → **Create a Tunnel** (or **New Tunnel**).
+5. Choose Cloudflare (the UI option to create a new tunnel), then select your operating system and architecture when prompted.
+6. Cloudflare will display a generated install command for `cloudflared`. Run that command on your server to install `cloudflared`.
+7. After installation, Cloudflare will show a service install command that looks like:
+
+```text
+sudo cloudflared service install eyJhIjoiNm.....
+```
+
+Execute the `sudo cloudflared service install ...` command on your server. This registers the tunnel as a system service and starts it.
+
+8. Click **Next** in the Cloudflare UI. You will be prompted to create a hostname. Provide:
+
+   * **Hostname:** the subdomain you want, e.g. `chat.example.com`
+   * **Type:** `HTTP`
+   * **URL:** `http://<local-ip>:9700`
+
+Notes:
+
+* You can try `http://localhost:9700` first. If the hostname doesn’t route correctly, determine your machine’s local IP:
+
+  * Linux/macOS: run `ip a` (or `ifconfig`)
+  * Windows: run `ipconfig`
+* Use the local IP (e.g., `http://192.168.1.100:9700`) when the tunnel needs to target a specific network interface.
+* Requirements: your domain must be added to Cloudflare; the tunnel steps are available after `npm run start` and the app is listening on the chosen port.
+
+When complete, Cloudflare will create DNS records and route traffic from your chosen hostname through the tunnel to your local app. Verify by visiting your hostname in a browser.
 
 ---
-**Make sure to star this project if you want to support me in improving it!**
 
-### More Projects:
-* [AdmiBot](https://admibot.xyz): All-in-One Discord Bot! Combine multiple bot features into one. Simplify server management and save time. Try it today!
+## Notes, security & best practices
+
+* Never commit `.env.local` to source control. Use secret managers for production.
+* For production use, the repository requires a license key from the Owner (see `LICENSE` below). This project is explicitly limited to personal, educational, or non-commercial use unless you obtain authorization.
+* Use HTTPS endpoints for any public-facing hostnames. Cloudflare provides TLS termination for tunnels.
+* Rotate API keys and credentials periodically. Keep least privilege on all keys.
+* If you expose the app to the Internet, harden your app (rate limiting, input validation, secure CSP headers, etc.).
+* Replace placeholder CDN upload endpoints with your own implementation and secure server-side validation in `lib/UploadCDN.ts`.
+
+---
+
+## Support / More projects
+
+If you find this project useful, consider starring the repository. For more projects and tools from the AdmiBot team, see:
+
+* AdmiBot: [https://admibot.xyz](https://admibot.xyz) — An all-in-one Discord Bot and toolkit.
+
+---
+
+**Acknowledgements**
+This project is authored and maintained by Hassen / the AdmiBot Team. Use responsibly and follow the license terms above.
