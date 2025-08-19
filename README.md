@@ -29,7 +29,7 @@ Clone or download this repository to your VPS.
 > Recommended OS: **Ubuntu or Debian** (Windows requires additional build tools for Next.js)
 
 ```bash
-git clone https://github.com/yourusername/chatbot.git
+git clone https://github.com/HasenDev/ChatBot.git
 cd chatbot
 ````
 
