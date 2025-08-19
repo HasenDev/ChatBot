@@ -1,8 +1,10 @@
 # ChatBot
 
-<img src="./images/preview.png" alt="Preview" width="420"/>
+<div align="center">
+  <img src="./images/preview.png" alt="ChatBot preview" width="1200" />
+</div>
 
-**ChatBot** is an open-source, production-oriented chatbot reference implementation inspired by modern conversational UIs such as ChatGPT and Gemini. It demonstrates a modular architecture, session management, persistent storage, and third-party API integrations (Discord OAuth2, Google Gemini, GROQ CMS). Use this repository to learn, prototype, or extend a real-world chatbot architecture.
+**ChatBot** is an open-source, production-oriented chatbot reference implementation inspired by modern conversational UIs such as ChatGPT and Gemini. It demonstrates a modular architecture, session management, persistent storage, and third-party API integrations (Discord OAuth2, Google Gemini, GROQ). Use this repository to learn, prototype, or extend a real-world chatbot architecture.
 
 For a live working example, visit: [https://chat.admibot.xyz](https://chat.admibot.xyz)
 
@@ -14,7 +16,7 @@ For a live working example, visit: [https://chat.admibot.xyz](https://chat.admib
 * User sessions with persistent storage
 * Discord OAuth2 login support
 * Google Gemini API integration
-* GROQ CMS integration
+* GROQ integration
 * CDN hooks for custom user icons
 * Deployment & tunnel guides (Cloudflare Tunnels)
 * Production-ready patterns for experimentation and learning
@@ -34,8 +36,7 @@ For a live working example, visit: [https://chat.admibot.xyz](https://chat.admib
 9. [Install, build & run](#install-build--run)
 10. [Cloudflare Tunnel (Zero Trust) — quick guide](#cloudflare-tunnel-zero-trust---quick-guide)
 11. [Notes, security & best practices](#notes-security--best-practices)
-12. [License](#license)
-13. [Support / More projects](#support--more-projects)
+12. [Support / More projects](#support--more-projects)
 
 ---
 
@@ -130,22 +131,43 @@ iconPath: "https://cdn.example.com/icons/chatbot-300x300.webp"
 
 ## MongoDB — step-by-step
 
-1. Sign in to MongoDB Cloud ([https://cloud.mongodb.com/](https://cloud.mongodb.com/)) and create a project. <img src="./images/new_project.png" alt="New Project" width="360"/>
+1. Sign in to MongoDB Cloud ([https://cloud.mongodb.com/](https://cloud.mongodb.com/)) and create a project.
 
-2. Inside the project click **Create Cluster** → choose **Free Tier** (or another cluster type). <img src="./images/create-cluster.png" alt="Create Cluster" width="360"/>
+<div align="left">
+  <img src="./images/new_project.png" alt="MongoDB - New Project" width="500" />
+</div>
 
-3. Configure and create the cluster. Wait until the cluster shows **Running**. <img src="./images/creating-cluster.png" alt="Creating Cluster" width="360"/>
+2. Inside the project click **Create Cluster** → choose **Free Tier** (or another cluster type).
+
+<div align="left">
+  <img src="./images/create-cluster.png" alt="MongoDB - Create Cluster" width="500" />
+</div>
+
+3. Configure and create the cluster. Wait until the cluster shows **Running**.
+
+<div align="left">
+  <img src="./images/creating-cluster.png" alt="MongoDB - Creating Cluster" width="500" />
+</div>
 
 4. Click **Connect** for the cluster and follow the steps:
 
-   * Create a **database user** (username + password) and note them.
-   * Under **Network Access** add your IP (or allow access from anywhere while testing — **not** recommended for production).
-   * Choose **Connect your application** and copy the connection string (select the Node.js driver).
+* Create a **database user** (username + password) and note them.
+* Under **Network Access** add your IP (or allow access from anywhere while testing — **not** recommended for production).
+* Choose **Connect your application** and copy the connection string (select the Node.js driver).
 
-     <img src="./images/step-1-creating.png" alt="Step 1" width="360"/>
+Each step screenshot is shown below.
 
-   <img src="./images/step-2-creating.png" alt="Step 2" width="360"/>
-   <img src="./images/step-3-creating.png" alt="Step 3" width="360"/>
+<div align="center">
+  <img src="./images/step-1-creating.png" alt="MongoDB - Step 1" width="500" />
+</div>
+
+<div align="center">
+  <img src="./images/step-2-creating.png" alt="MongoDB - Step 2" width="500" />
+</div>
+
+<div align="center">
+  <img src="./images/step-3-creating.png" alt="MongoDB - Step 3" width="500" />
+</div>
 
 5. Paste the connection string into `MONGODB_URI` in `.env.local` and replace `<username>`, `<password>`, and `<dbname>`.
 
@@ -166,7 +188,7 @@ iconPath: "https://cdn.example.com/icons/chatbot-300x300.webp"
 1. Log in to GROQ Console ([https://console.groq.com/playground](https://console.groq.com/playground)).
 2. Go to **API Keys** → **Create API Key**, name it, complete any required CAPTCHAs, then create.
 3. Copy the generated key into `GROQ_API_KEY` in `.env.local`.
-4. Limit permissions on your GROQ API key according to your CMS needs.
+4. Now you can use models like ChatGPT-OSS, DeepSeek and LLama
 
 ---
 
@@ -210,7 +232,7 @@ If you change the port in your runtime configuration, update any tunneling or re
 
 ## Cloudflare Tunnel (Zero Trust) — quick guide
 
-> This guide shows how to expose a local instance through Cloudflare Zero Trust Tunnels (cloudflared). It assumes you have a domain added to your Cloudflare account.
+> This guide shows how to expose a local instance through Cloudflare Zero Trust Tunnels (`cloudflared`). It assumes you have a domain added to your Cloudflare account.
 
 1. Sign in to your Cloudflare account at [https://dash.cloudflare.com](https://dash.cloudflare.com).
 2. In the left sidebar scroll and click **Zero Trust**.
@@ -228,9 +250,9 @@ Execute the `sudo cloudflared service install ...` command on your server. This 
 
 8. Click **Next** in the Cloudflare UI. You will be prompted to create a hostname. Provide:
 
-   * **Hostname:** the subdomain you want, e.g. `chat.example.com`
-   * **Type:** `HTTP`
-   * **URL:** `http://<local-ip>:9700`
+* **Hostname:** the subdomain you want, e.g. `chat.example.com`
+* **Type:** `HTTP`
+* **URL:** `http://<local-ip>:9700`
 
 Notes:
 
@@ -248,7 +270,7 @@ When complete, Cloudflare will create DNS records and route traffic from your ch
 ## Notes, security & best practices
 
 * Never commit `.env.local` to source control. Use secret managers for production.
-* For production use, the repository requires a license key from the Owner (see `LICENSE` below). This project is explicitly limited to personal, educational, or non-commercial use unless you obtain authorization.
+* For production use, the repository requires a license key from the Owner. This project is explicitly limited to personal, educational, or non-commercial use unless you obtain authorization.
 * Use HTTPS endpoints for any public-facing hostnames. Cloudflare provides TLS termination for tunnels.
 * Rotate API keys and credentials periodically. Keep least privilege on all keys.
 * If you expose the app to the Internet, harden your app (rate limiting, input validation, secure CSP headers, etc.).
